@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height: 550px; border: 1px solid #eee">
+  <el-container style="border: 1px solid #eee;">
     <el-aside width="200px">
       <div><ul id="treeDemo" class="ztree"></ul></div>
     </el-aside>
@@ -21,54 +21,54 @@
         highlight-current-row
         style="width: 100%;"
         @sort-change="sortChange"
-        height="410"
+        height="390"
       >
-        <el-table-column label="ID" prop="id" sortable="custom" align="center" width="75">
+        <el-table-column label="ID" prop="id"  sortable="custom" align="center" width="75px">
           <template slot-scope="scope">
             <span>{{ scope.row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="菜单名称" min-width="100px">
+        <el-table-column label="菜单名称" align="center" min-width="100px">
           <template slot-scope="scope">
             <span class="link-type" @click="handleUpdate(scope.row)">{{ scope.row.menu_name }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="权限标识" width="150px">
+        <el-table-column label="权限标识" align="center"  width="150px">
           <template slot-scope="scope">
             <span>{{ scope.row.permission_name}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="路由地址" width="150px" align="center">
+        <el-table-column label="路由地址" align="center" width="150px">
           <template slot-scope="scope">
             <span>{{ scope.row.uri}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="菜单类型" align="center" width="95">
+        <el-table-column label="菜单类型" align="center" width="95px">
           <template slot-scope="scope">
             <span>{{ scope.row.menu_type | typeFilter }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" class-name="status-col" width="100">
+        <el-table-column label="状态" align="center" width="100px">
           <template slot-scope="scope">
             <el-tag :type="scope.row.status | colorFilter ">{{ scope.row.status | statusFilter }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="图标" width="70px" align="center">
+        <el-table-column label="图标"  align="center" width="70px">
           <template slot-scope="scope">
             <i v-bind:class=" scope.row.icon "></i>
           </template>
         </el-table-column>
-        <el-table-column label="模块类型" width="80px">
+        <el-table-column label="模块类型" align="center" width="80px" >
           <template slot-scope="scope">
             <span>{{ scope.row.guard_name | guardFilter }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="排序" class-name="status-col" width="100">
+        <el-table-column label="排序" align="center" width="100px">
           <template slot-scope="scope">
             <span>{{ scope.row.sort }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="320"   fixed="right" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center" width="320"  fixed="right" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button type="primary" v-if="scope.row.parent_id == 0" icon="el-icon-plus" size="small" @click="handleCreate(scope.row.id,'creates')">创建子菜单</el-button>
             <el-button type="primary" v-else-if="scope.row.menu_type == 2" icon="el-icon-plus" size="small" @click="handleCreate(scope.row.id,'createz')">创建功能点</el-button>
@@ -192,7 +192,7 @@
         listLoading: true,
         listQuery: {
           page: 1,
-          limit: 10,
+          limit: 5,
           export: undefined,
           title: undefined,
           pid: undefined,

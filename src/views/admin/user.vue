@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height: 550px; border: 1px solid #eee">
+  <el-container style="border: 1px solid #eee">
     <el-main>
       <div class="filter-container">
         <el-form :inline="true" class="demo-form-inline">
@@ -29,7 +29,7 @@
         highlight-current-row
         style="width: 100%;"
         @sort-change="sortChange"
-        height="410"
+        height="390"
       >
         <el-table-column label="ID" prop="id" sortable="custom" align="center" width="75">
           <template slot-scope="scope">
@@ -618,7 +618,7 @@
     margin: 10px;
   }
   .pagination-container {
-    padding-top: 10px;
+    padding:10px;
   }
 
   .time-container {

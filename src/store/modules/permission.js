@@ -1,6 +1,6 @@
-import { asyncRoutes, constantRoutes ,asyncMenus } from '@/router'
+import { asyncRoutes, constantRoutes } from '@/router'
 import { generateRoutes } from '@/api/login'
-
+import { asyncMenus } from  './settings'
 /**
  * 通过meta.role判断是否与当前用户权限匹配
  * @param roles
@@ -31,7 +31,6 @@ export function filterAsyncRoutes(routes, roles) {
       res.push(tmp)
     }
   })
-
   return res
 }
 
@@ -46,6 +45,8 @@ export function menuAsyncRoutes(routes) {
     }
     res.push(tmp)
   })
+  //404页面跳转
+  res.push({ path: '*', redirect: '/404', hidden: true });
   return res
 }
 
