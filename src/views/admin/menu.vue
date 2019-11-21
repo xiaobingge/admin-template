@@ -21,7 +21,6 @@
         highlight-current-row
         style="width: 100%;"
         @sort-change="sortChange"
-        height="390"
       >
         <el-table-column label="ID" prop="id"  sortable="custom" align="center" width="75px">
           <template slot-scope="scope">

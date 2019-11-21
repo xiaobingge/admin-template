@@ -29,7 +29,6 @@
         highlight-current-row
         style="width: 100%;"
         @sort-change="sortChange"
-        height="390"
       >
         <el-table-column label="ID" prop="id" sortable="custom" align="center" width="75">
           <template slot-scope="scope">
@@ -85,6 +84,17 @@
         <el-form :model="temp" status-icon :rules="rules" ref="dataForm" label-width="100px"  style="width: 400px;" class="demo-ruleForm">
           <el-form-item label="用户名"  prop="name">
             <el-input v-model="temp.name" v-bind:disabled="disabledInput" placeholder="输入账号"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-upload
+              class="avatar-uploader"
+              :action= uploadUrl
+              :show-file-list="false"
+              :on-success="handleAvatarSuccess"
+              :before-upload="beforeAvatarUpload">
+              <img v-if="imageUrl" :src="imageUrl" class="avatar">
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
           </el-form-item>
           <el-form-item label="邮箱"  prop="email" >
             <el-input v-model="temp.email" v-bind:disabled="disabledInput" placeholder="输入邮箱"></el-input>
@@ -144,6 +154,31 @@
     </el-main>
   </el-container>
 </template>
+<style>
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>
 <script>
   import { fetchList, createUser, updateUser, updateStatus,deleteUser,getRoles,getPermission,setPermission } from '@/api/user'
   import waves from '@/directive/waves' // Waves directive
@@ -189,6 +224,8 @@
     },
     data(){
       return {
+        imageUrl:'',
+        uploadUrl: process.env.VUE_APP_BASE_API + '/uploadFiles',
         roles:[],
         apps:[],
         tableKey: 0,
@@ -197,7 +234,7 @@
         listLoading: true,
         listQuery: {
           page: 1,
-          limit: 10,
+          limit: 5,
           export: undefined,
           type:'1',
           keyword: '',
@@ -244,6 +281,21 @@
       this.getList()
     },
     methods: {
+      handleAvatarSuccess(res, file) {
+        this.imageUrl = URL.createObjectURL(file.raw);
+      },
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+        return isJPG && isLt2M;
+      },
       onClick(event, treeId, treeNode){
         this.listQuery.pid = treeNode.id;
         this.listQuery.sort = '+id';
