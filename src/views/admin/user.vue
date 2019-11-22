@@ -40,6 +40,11 @@
             <span>{{ scope.row.name }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="头像" width="150px" align="center">
+          <template slot-scope="scope">
+            <span><el-avatar :size="64" v-if="scope.row.avatar" :src="scope.row.avatar | getAvatarUrl" ></el-avatar></span>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" width="150px" align="center">
           <template slot-scope="scope">
             <el-tag :type="scope.row.status | colorFilter2">{{ scope.row.status | statusFilter  }}</el-tag>
@@ -82,19 +87,20 @@
 
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" >
         <el-form :model="temp" status-icon :rules="rules" ref="dataForm" label-width="100px"  style="width: 400px;" class="demo-ruleForm">
-          <el-form-item label="用户名"  prop="name">
-            <el-input v-model="temp.name" v-bind:disabled="disabledInput" placeholder="输入账号"></el-input>
-          </el-form-item>
-          <el-form-item>
+          <el-form-item label="头像">
             <el-upload
               class="avatar-uploader"
-              :action= uploadUrl
+              :data=param
+              :action=uploadUrl
               :show-file-list="false"
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload">
-              <img v-if="imageUrl" :src="imageUrl" class="avatar">
+              <img  alt="" v-if="temp.avatar" :src="temp.avatar | getAvatarUrl"  class="avatar" />
               <i v-else class="el-icon-plus avatar-uploader-icon"></i>
             </el-upload>
+          </el-form-item>
+          <el-form-item label="用户名"  prop="name">
+            <el-input v-model="temp.name" v-bind:disabled="disabledInput" placeholder="输入账号"></el-input>
           </el-form-item>
           <el-form-item label="邮箱"  prop="email" >
             <el-input v-model="temp.email" v-bind:disabled="disabledInput" placeholder="输入邮箱"></el-input>
@@ -221,11 +227,14 @@
       colorFilter2(status) {
         return colorMap2[status]
       },
+      getAvatarUrl(url) {
+        return process.env.VUE_APP_IMAGE_DIR + url;
+      },
     },
     data(){
       return {
-        imageUrl:'',
-        uploadUrl: process.env.VUE_APP_BASE_API + '/uploadFiles',
+        uploadUrl: process.env.VUE_APP_UPLOAD_URL,
+        param:{type:'avatar'},
         roles:[],
         apps:[],
         tableKey: 0,
@@ -265,6 +274,7 @@
           id: undefined,
           name: '',
           email:'',
+          avatar:'',
           status:1,
           password:'',
           selected_ids:[],
@@ -281,8 +291,8 @@
       this.getList()
     },
     methods: {
-      handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
+      handleAvatarSuccess(res) {
+        this.temp.avatar = res.data.path;
       },
       beforeAvatarUpload(file) {
         const isJPG = file.type === 'image/jpeg';
@@ -339,13 +349,15 @@
           id: undefined,
           name: '',
           email:'',
+          avatar:'',
           status:1,
           password:'',
           selected_ids:[],
           selected_app_ids:[],
           create_at:'',
           update_at:''
-        }
+        };
+        this.avatarUrl = ''
       },
       resetDisable(){
         this.disabledInput = false;
@@ -395,6 +407,10 @@
           row.selected_ids = [];
           row.selected_app_ids = [];
           this.temp = Object.assign({}, row); // copy obj
+          // if(this.temp.avatar)
+          //   this.avatarUrl =  process.env.VUE_APP_IMAGE_DIR + this.temp.avatar;
+          // else
+          //   this.avatarUrl = '';
           this.dialogStatus = 'update';
           this.disabledInput = true;
           this.dialogFormVisible = true;
