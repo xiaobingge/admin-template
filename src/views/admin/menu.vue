@@ -1,5 +1,5 @@
 <template>
-  <el-container style="border: 1px solid #eee;">
+  <el-container style="height: 520px; border: 1px solid #eee">
     <el-aside width="200px">
       <div><ul id="treeDemo" class="ztree"></ul></div>
     </el-aside>

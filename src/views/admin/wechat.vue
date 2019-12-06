@@ -37,7 +37,7 @@
           <div class="weixin-menu-detail" v-if="selectedMenuLevel()==1">
             <div class="menu-input-group" style="border-bottom: 2px #e8e8e8 solid;">
               <div class="menu-name">{{menu.button[selectedMenuIndex].name}}</div>
-              <div class="menu-del" @click="delMenu">删除菜单</div>
+              <el-button type="danger" size="mini" style="float: right" @click="delMenu">删除主菜单</el-button>
             </div>
             <div class="menu-input-group">
               <div class="menu-label">菜单名称</div>
@@ -72,7 +72,7 @@
                   <div class="menu-label">页面地址</div>
                   <div class="menu-input">
                     <input type="text" placeholder="" class="menu-input-text" v-model="menu.button[selectedMenuIndex].url">
-                    <p class="menu-tips cursor" @click="selectNewsUrl">从公众号图文消息中选择</p>
+                    <!--<p class="menu-tips cursor" @click="selectNewsUrl">从公众号图文消息中选择</p>-->
                   </div>
                 </div>
               </div>
@@ -84,9 +84,10 @@
                     <strong>从素材库中选择</strong>
                   </div>
                   <div class="menu-msg-select" v-else>
-                    <div class="menu-msg-title"><i class="icon_msg_sender"></i>{{material.title}}</div>
-                    <a :href="material.url" target="_blank" class="btn btn-sm btn-info">查看</a>
-                    <div class="btn btn-sm btn-danger" @click="delMaterialId">删除</div>
+                   <i class="icon_msg_sender"></i>{{material.title}}
+                    <el-button-group>
+                      <el-button @click="goto(material.url)"   size="mini" type="success">查看</el-button>
+                      <el-button @click="delMaterialId"  size="mini" type="danger">删除</el-button></el-button-group>
                   </div>
                 </div>
               </div>
@@ -127,7 +128,7 @@
           <div class="weixin-menu-detail" v-if="selectedMenuLevel()==2">
             <div class="menu-input-group" style="border-bottom: 2px #e8e8e8 solid;">
               <div class="menu-name">{{menu.button[selectedMenuIndex].sub_button[selectedSubMenuIndex].name}}</div>
-              <div class="menu-del" @click="delMenu">删除子菜单</div>
+              <el-button type="danger" size="mini" style="float: right"  @click="delMenu">删除子菜单</el-button>
             </div>
             <div class="menu-input-group">
               <div class="menu-label">子菜单名称</div>
@@ -161,7 +162,7 @@
                 <div class="menu-label">页面地址</div>
                 <div class="menu-input">
                   <input type="text" placeholder="" class="menu-input-text" v-model="menu.button[selectedMenuIndex].sub_button[selectedSubMenuIndex].url">
-                  <p class="menu-tips cursor" @click="selectNewsUrl">从公众号图文消息中选择</p>
+                  <!--<p class="menu-tips cursor" @click="selectNewsUrl">从公众号图文消息中选择</p>-->
                 </div>
               </div>
             </div>
@@ -174,8 +175,9 @@
                 </div>
                 <div class="menu-msg-select" v-else>
                   <i class="icon_msg_sender"></i>{{material.title}}
-                  <a :href="material.url" target="_blank" class="btn btn-sm btn-info">查看</a>
-                  <div class="btn btn-sm btn-danger" @click="delMaterialId">删除</div>
+                  <el-button-group>
+                    <el-button @click="goto(material.url)"   size="mini" type="success">查看</el-button>
+                    <el-button @click="delMaterialId"  size="mini" type="danger">删除</el-button></el-button-group>
                 </div>
               </div>
             </div>
@@ -213,19 +215,51 @@
           </div>
         </div>
         <div class="weixin-btn-group">
-          <el-button type="primary" id="btn-create" >发布</el-button>
-          <el-button type="primary" id="btn-clear" >清空</el-button>
+          <el-button type="primary" @click="pushWechat">发布</el-button>
+          <el-button type="danger" @click="clearWechat">清空</el-button>
         </div>
       </div>
+
+    <el-dialog
+      title="选择素材（最新100条）"
+      :visible.sync="dialogVisible"
+      width="60%">
+      <span>
+        <el-table
+          :data="list"
+          border
+          style="width:100%">
+          <el-table-column label="素材名称">
+              <template slot-scope="scope">
+                <li v-for="(items, index) in scope.row.content.news_item"><el-link type="primary" target="_blank" :href="items.url">{{index + 1}}：{{ items.title }}</el-link></li>
+              </template>
+          </el-table-column>
+          <el-table-column label="操作" width="100">
+               <template slot-scope="scope">
+                <span><el-button type="primary" size="mini" @click="setMaterialId(scope.row.media_id,scope.row.content.news_item[0].title,scope.row.content.news_item[0].url)">选择</el-button></span>
+              </template>
+          </el-table-column>
+        </el-table>
+      </span>
+      <div align="center" slot="footer" class="dialog-footer">
+        <el-button type="success" :loading="loading" @click="sysMaterial()">同步微信公众号素材</el-button>
+      </div>
+    </el-dialog>
   </el-container>
+
+
+
 </template>
 <script>
+  import { fetchList,setMenus,getmaterial,sysmaterial,selectmaterial } from '@/api/wechat';
   export default {
     name: 'wechat',
     data() {
       return {
+        list:[],
+        dialogVisible: false,
+        loading:false,
         weixinTitle: '自定义菜单',
-        //menu: {'button': [{"type":"click","name":"主菜单13","key":"测试key","sub_button":[]},{"name":"主菜单2","sub_button":[{"type":"view","name":"子菜单","url":"https://cn.vuejs.org/v2/guide/","sub_button":[]}]},{"name":"主菜单3","sub_button":[{"type":"view","name":"子菜单","url":"https://cn.vuejs.org/v2/guide/","sub_button":[]},{"type":"view","name":"子菜单","url":"https://cn.vuejs.org/v2/guide/","sub_button":[]},{"type":"view","name":"子菜单","url":"https://cn.vuejs.org/v2/guide/","sub_button":[]},{"type":"click","name":"子菜单","url":"https://cn.vuejs.org/v2/guide/","sub_button":[]}]}]},//当前菜单
         menu:{'button':[]},
         selectedMenuIndex: '',//当前选中菜单索引
         selectedSubMenuIndex: '',//当前选中子菜单索引
@@ -242,6 +276,9 @@
     },
     methods:{
       getMenu:function() {
+        fetchList().then(response => {
+          this.menu = response.data
+        })
       },
       //选中主菜单
       selectedMenu:function(i,event){
@@ -249,8 +286,8 @@
         this.selectedMenuIndex=i;
         var selectedMenu=this.menu.button[this.selectedMenuIndex]
         //清空选中media_id 防止再次请求
-        if(selectedMenu.media_id!=undefined&&selectedMenu.media_id!=''&&this.selectedMenuType()==2){
-          //this.getMaterial(selectedMenu.media_id)
+        if(selectedMenu.media_id !== undefined && selectedMenu.media_id !=='' && this.selectedMenuType()===2){
+          this.getMaterial(selectedMenu.media_id)
         }
         //检查名称长度
         this.checkMenuName(selectedMenu.name)
@@ -259,8 +296,9 @@
       selectedSubMenu:function(i,event){
         this.selectedSubMenuIndex=i
         var selectedSubMenu=this.menu.button[this.selectedMenuIndex].sub_button[this.selectedSubMenuIndex]
-        if(selectedSubMenu.media_id!=undefined&&selectedSubMenu!=''&&this.selectedMenuType()==2){
-          //this.getMaterial(selectedSubMenu.media_id)
+        if(selectedSubMenu.media_id !== undefined && selectedSubMenu.media_id !=='' && this.selectedMenuType()===2){
+          console.log(selectedSubMenu.media_id);
+          this.getMaterial(selectedSubMenu.media_id)
         }
         this.checkMenuName(selectedSubMenu.name)
       },
@@ -279,7 +317,7 @@
       },
       //获取菜单类型 1. view网页类型，2. media_id类型和view_limited类型 3. click点击类型，4.miniprogram表示小程序类型
       selectedMenuType: function () {
-        if (this.selectedMenuLevel() == 1&&this.menu.button[this.selectedMenuIndex].sub_button.length==0) {
+        if (this.selectedMenuLevel() == 1 && this.menu.button[this.selectedMenuIndex].sub_button.length==0) {
           //主菜单
           switch (this.menu.button[this.selectedMenuIndex].type) {
             case 'view':return 1;
@@ -318,7 +356,7 @@
         if(level==1&&this.menu.button.length<3){
           this.menu.button.push({
             "type": "view",
-            "name": "菜单名称",
+            "name": "",
             "sub_button": [],
             "url":""
           })
@@ -328,7 +366,7 @@
         if(level==2&&this.menu.button[this.selectedMenuIndex].sub_button.length<5){
           this.menu.button[this.selectedMenuIndex].sub_button.push({
             "type": "view",
-            "name": "子菜单名称",
+            "name": "",
             "url":""
           })
           this.selectedSubMenuIndex=this.menu.button[this.selectedMenuIndex].sub_button.length-1
@@ -388,7 +426,21 @@
       },
       //选择公众号素材库素材
       selectMaterialId:function(){
-
+        this.dialogVisible = true;
+        selectmaterial().then(response => {
+          this.list = response.data;
+        })
+      },
+      sysMaterial:function(){
+        this.loading = true;
+        sysmaterial().then(response=>{
+          if(response.code === 1000){
+            selectmaterial().then(response => {
+              this.list = response.data;
+              this.loading = false;
+            })
+          }
+        });
       },
       //选择公众号图文链接
       selectNewsUrl:function(){
@@ -396,11 +448,26 @@
       },
       //设置选择的素材id
       setMaterialId:function(id,title,url){
-
+        if(this.selectedMenuLevel()===1){
+          this.menu.button[this.selectedMenuIndex].media_id = id;
+        }else if(this.selectedMenuLevel()===2){
+          this.menu.button[this.selectedMenuIndex].sub_button[this.selectedSubMenuIndex].media_id = id;
+        }
+        this.material.title=title
+        this.material.url=url
+        this.dialogVisible = false;
       },
       //删除选择的素材id
       delMaterialId:function(){
-
+        if(this.selectedMenuLevel()===1){
+          this.menu.button[this.selectedMenuIndex].media_id=''
+        }else if(this.selectedMenuLevel()===2){
+          this.menu.button[this.selectedMenuIndex].sub_button[this.selectedSubMenuIndex].media_id=''
+        }
+        //this.material = {};
+      },
+      goto:function(url){
+        window.open(url,"_blank");
       },
       //设置选择的图文链接
       setNewsUrl:function(url){
@@ -408,7 +475,44 @@
       },
       //获取素材信息
       getMaterial:function(id){
-
+        this.material.title = '';
+        this.material.url= '';
+        getmaterial({'media_id':id}).then(response=>{
+          this.material.title=response.data.content.news_item[0].title
+          this.material.url=response.data.content.news_item[0].url
+        });
+      },
+      pushWechat:function() {
+        this.$confirm("确定要发布到微信服务器么", '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          setMenus(this.menu).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '更新成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }).catch(err => { console.error(err) })
+      },
+      clearWechat:function() {
+        this.$confirm("确定后将清空后公众号自定义菜单", '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          setMenus({'button':[]}).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '清空成功',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }).catch(err => { console.error(err) })
       }
     }
   }
@@ -447,7 +551,7 @@
     left:0px;
     width: 320px;
     height:64px;
-    background: transparent url(./images/menu_head.png) no-repeat 0 0;
+    background: transparent url(../../assets/images/menu_head.png) no-repeat 0 0;
     background-position: 0 0;
   }
   .weixin-preview .weixin-hd .weixin-title{
@@ -469,7 +573,7 @@
     left: 0;
     right: 0;
     border-top: 1px solid #e7e7e7;
-    background: transparent url(./images/menu_foot.png) no-repeat 0 0;
+    background: transparent url(../../assets/images/menu_foot.png) no-repeat 0 0;
     background-position: 0 0;
     background-repeat: no-repeat;
     padding-left: 43px;
@@ -556,7 +660,7 @@
     display:block;
   }
   .weixin-preview .icon_menu_dot{
-    background: url(./images/index_z354723.png) 0px -36px no-repeat;
+    background: url(../../assets/images/index_z354723.png) 0px -36px no-repeat;
     width: 7px;
     height: 7px;
     vertical-align: middle;
@@ -565,7 +669,7 @@
     margin-top: -2px;
   }
   .weixin-preview .icon14_menu_add{
-    background: url(./images/index_z354723.png) 0px 0px no-repeat;
+    background: url(../../assets/images/index_z354723.png) 0px 0px no-repeat;
     width: 14px;
     height: 14px;
     vertical-align: middle;
@@ -573,7 +677,7 @@
     margin-top: -2px;
   }
   .weixin-preview li:hover .icon14_menu_add{
-    background: url(./images/index_z354723.png) 0px -18px no-repeat;
+    background: url(../../assets/images/index_z354723.png) 0px -18px no-repeat;
   }
 
   .weixin-preview .menu-item:hover{
@@ -713,7 +817,7 @@
     display: inline-block;
   }
   .icon36_common.add_gray{
-    background: url(./images/base_z381ecd.png) 0 -2548px no-repeat;
+    background: url(../../assets/images/base_z381ecd.png) 0 -2548px no-repeat;
   }
   .icon_msg_sender{
     margin-right: 3px;
@@ -722,7 +826,7 @@
     height: 20px;
     vertical-align: middle;
     display: inline-block;
-    background: url(./images/msg_tab_z25df2d.png) 0 -270px no-repeat;
+    background: url(../../assets/images/msg_tab_z25df2d.png) 0 -270px no-repeat;
   }
 
   .weixin-btn-group{

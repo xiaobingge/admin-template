@@ -42,7 +42,7 @@
         </el-table-column>
         <el-table-column label="头像" width="150px" align="center">
           <template slot-scope="scope">
-            <span><el-avatar :size="64" v-if="scope.row.avatar" :src="scope.row.avatar | getAvatarUrl" ></el-avatar></span>
+            <span><el-avatar :size="32" v-if="scope.row.avatar" :src="scope.row.avatar | getAvatarUrl" ></el-avatar></span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="150px" align="center">
