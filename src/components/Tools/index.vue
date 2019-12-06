@@ -84,7 +84,7 @@
     filters:{
       getImageUrl(url) {
         var myDate = new Date();
-        return process.env.VUE_APP_IMAGE_DIR + url + '?ts=' +  myDate.getTime() ;
+        return process.env.VUE_APP_IMAGE_DIR + '/' + url + '?ts=' +  myDate.getTime() ;
       },
     },
     data() {
