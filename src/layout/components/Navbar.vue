@@ -1,11 +1,8 @@
 <template>
   <div class="navbar">
     <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
-
     <breadcrumb class="breadcrumb-container" />
-
     <div class="right-menu">
-
       <error-log class="errLog-container right-menu-item hover-effect" />
       <screenfull class="right-menu-item hover-effect" />
 
@@ -24,21 +21,22 @@
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
+      <el-dialog title="修改密码" :visible.sync="dialogFormVisible">
+        <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px"  style="width: 400px;" class="demo-ruleForm">
+          <el-form-item label="新密码" prop="pass">
+            <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="确认新密码" prop="checkPass">
+            <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="submitForm('ruleForm')">确定</el-button>
+          <el-button @click="resetForm('ruleForm')">重置</el-button>
+        </div>
+      </el-dialog>
     </div>
-    <el-dialog title="修改密码" :visible.sync="dialogFormVisible" >
-      <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px"  style="width: 400px;" class="demo-ruleForm">
-        <el-form-item label="新密码" prop="pass">
-          <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="确认新密码" prop="checkPass">
-          <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm('ruleForm')">确定</el-button>
-        <el-button @click="resetForm('ruleForm')">重置</el-button>
-      </div>
-    </el-dialog>
+
   </div>
 
 </template>
