@@ -5,7 +5,7 @@
         <img v-if="logo" src="./min-logo.png" class="sidebar-logo">
       </router-link>
       <router-link v-else key="expand" to="/">
-        <img v-if="logo" src="./logo.png" class="sidebar-logo" height="50">
+        <img v-if="logo" src="./logo.png" class="sidebar-logo" height="60">
       </router-link>
     </transition>
   </div>
@@ -42,8 +42,8 @@ export default {
 .sidebar-logo-container {
   position: relative;
   width: 100%;
-  height: 50px;
-  line-height: 50px;
+  height: 60px;
+  line-height: 60px;
   //background: #fff;
   text-align: center;
   overflow: hidden;
