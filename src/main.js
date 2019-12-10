@@ -17,6 +17,9 @@ import $ from 'jquery'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+
+import './errorLog' // error log
+
 import "ztree/js/jquery.ztree.core.min.js";
 import "ztree/js/jquery.ztree.excheck.min.js";
 import "ztree/css/zTreeStyle/zTreeStyle.css";
