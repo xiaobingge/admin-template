@@ -24,7 +24,7 @@
     </div></el-col>
 
     <el-col :span="12"><div class="grid-content bg-purple">
-        <el-form-item label="URL编码转换：">
+        <el-form-item label="URL转换：">
           <el-input  placeholder="请输入想要转换的字符" v-model="tools.url"></el-input>
         </el-form-item>
         <el-form-item>
@@ -113,7 +113,7 @@
               this.tools[b] = response.data;
             }else{
               let a = this.tools.size.split('x');
-              this.size = a[0];
+              this.size = parseInt(a[0]) + parseInt(30);
               this.image = response.data;
             }
 
