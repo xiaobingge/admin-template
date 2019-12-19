@@ -29,6 +29,7 @@ export const asyncMenus = {
   'role.index': resolve => require(['@/views/admin/role'], resolve),
   'user.index': resolve => require(['@/views/admin/user'], resolve),
   'wechat.menu': resolve => require(['@/views/admin/wechat'], resolve),
+  'wechat.reply': resolve => require(['@/views/admin/reply'], resolve),
 };
 
 export default {
