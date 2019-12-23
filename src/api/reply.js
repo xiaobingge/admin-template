@@ -47,11 +47,11 @@ export function deleteRule(id) {
   })
 }
 
-export function getRules() {
+export function getRules(query) {
   return request({
     url: '/reply/getRules',
     method: 'get',
-    params:{}
+    params:query
   })
 }
 
