@@ -23,7 +23,9 @@
             <el-table-column
               label="回复内容" align="center">
               <template slot-scope="scope">
-                <el-image v-if="scope.row.type == '2' " :src="scope.row.content | getPicUrl" style="width: 100px" ></el-image><span v-else>{{ scope.row.content }}</span>
+                <el-image v-if="scope.row.type == '2' " :src="scope.row.content | getPicUrl" style="width: 100px" ></el-image>
+                <dl v-else-if="scope.row.type == '3' " v-for="(items, index) in scope.row.items.news_item"><el-link type="primary" target="_blank" :href="items.url">{{ items.title }}</el-link></dl>
+                <span v-else>{{ scope.row.content }}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -37,9 +39,9 @@
           <el-dialog
             :title="statusMap[textType]"
             :visible.sync="dialogVisible"
-            width="35%">
-            <el-tabs type="border-card" v-model="form.type">
-              <el-tab-pane name="1">
+            :width=width>
+            <el-tabs type="border-card" v-model="form.type" @tab-click="changeWidth">
+              <el-tab-pane name="1" >
                 <span slot="label"><i class="el-icon-edit"></i> 文本</span>
                 <el-form>
                 <el-form-item>
@@ -48,7 +50,7 @@
                 </el-form>
               </el-tab-pane>
               <el-tab-pane name="2">
-                <span slot="label"><i class="el-icon-picture"></i> 图片</span>
+                <span slot="label"><i class="el-icon-camera-solid"></i> 图片</span>
                 <el-upload
                   class="upload-demo"
                   :action=uploadUrl
@@ -58,11 +60,29 @@
                   :on-exceed="handleExceed"
                   :on-success="uploadSuccess"
                   list-type="picture">
-                  <el-button size="small" type="primary">点击上传</el-button>
+                  <el-button size="small" type="primary">点击上传<i class="el-icon-upload el-icon--right"></i></el-button>
                 </el-upload>
+              </el-tab-pane>
+              <el-tab-pane name="3">
+                <span slot="label"><i class="el-icon-picture"></i> 图文</span>
+                <el-table
+                  :data="news"
+                  style="width:100%">
+                  <el-table-column label="ID" align="center">
+                    <template slot-scope="scope">
+                    <el-radio v-model="media_id" :label="scope.row.media_id"></el-radio>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="素材名称">
+                    <template slot-scope="scope">
+                     <dl v-for="(items, index) in scope.row.content.news_item"><el-link type="primary" target="_blank" :href="items.url">{{ items.title }}</el-link></dl>
+                    </template>
+                  </el-table-column>
+                </el-table>
               </el-tab-pane>
             </el-tabs>
             <div slot="footer" class="dialog-footer">
+              <el-button style="float: left;" v-if="form.type == 3 " type="success" :loading="loading" @click="sysMaterial()">同步微信公众号素材</el-button>
               <el-button @click="dialogVisible = false">取 消</el-button>
               <el-button type="primary" :disabled="disable1" @click="saveReply(1)">确 定</el-button>
             </div>
@@ -158,7 +178,9 @@
               <el-table-column
                 label="回复内容" align="center">
                 <template slot-scope="scope">
-                  <el-image v-if="scope.row.type == '2'" :src="scope.row.content | getPicUrl" style="width: 100px" ></el-image><span v-else>{{ scope.row.content }}</span>
+                  <el-image v-if="scope.row.type == '2' " :src="scope.row.content | getPicUrl" style="width: 100px" ></el-image>
+                  <dl v-else-if="scope.row.type == '3' " v-for="(items, index) in scope.row.items.news_item"><el-link type="primary" target="_blank" :href="items.url">{{ items.title }}</el-link></dl>
+                  <span v-else>{{ scope.row.content }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -169,11 +191,11 @@
               </el-table-column>
             </el-table>
             <el-dialog
-              width="35%"
+              :width=width
               title="添加回复"
               :visible.sync="innerVisible1"
               append-to-body>
-              <el-tabs type="border-card" v-model="form.type">
+              <el-tabs type="border-card" v-model="form.type" @tab-click="changeWidth">
                 <el-tab-pane name="1">
                   <span slot="label"><i class="el-icon-edit"></i> 文本</span>
                   <el-form>
@@ -183,7 +205,7 @@
                   </el-form>
                 </el-tab-pane>
                 <el-tab-pane name="2">
-                  <span slot="label"><i class="el-icon-picture"></i> 图片</span>
+                  <span slot="label"><i class="el-icon-camera-solid"></i> 图片</span>
                   <el-upload
                     class="upload-demo"
                     :action=uploadUrl
@@ -193,11 +215,29 @@
                     :on-exceed="handleExceed"
                     :on-success="uploadSuccess"
                     list-type="picture">
-                    <el-button size="small" type="primary">点击上传</el-button>
+                    <el-button size="small" type="primary">点击上传<i class="el-icon-upload el-icon--right"></i></el-button>
                   </el-upload>
+                </el-tab-pane>
+                <el-tab-pane name="3">
+                  <span slot="label"><i class="el-icon-picture"></i> 图文</span>
+                  <el-table
+                    :data="news"
+                    style="width:100%">
+                    <el-table-column label="ID" align="center">
+                      <template slot-scope="scope">
+                        <el-radio v-model="media_id" :label="scope.row.media_id"></el-radio>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="素材名称">
+                      <template slot-scope="scope">
+                        <dl v-for="(items, index) in scope.row.content.news_item"><el-link type="primary" target="_blank" :href="items.url">{{ items.title }}</el-link></dl>
+                      </template>
+                    </el-table-column>
+                  </el-table>
                 </el-tab-pane>
               </el-tabs>
               <div slot="footer" class="dialog-footer">
+                <el-button style="float: left;" v-if="form.type == 3 " type="success" :loading="loading" @click="sysMaterial()">同步微信公众号素材</el-button>
                 <el-button @click="innerVisible1 = false">取 消</el-button>
                 <el-button type="primary" :disabled="disable1" @click="saveReply(2)">确 定</el-button>
               </div>
@@ -302,7 +342,9 @@
               <el-table-column
                 label="回复内容" align="center">
                 <template slot-scope="scope">
-                  <el-image v-if="scope.row.type == '2'" :src="scope.row.content | getPicUrl" style="width: 100px" ></el-image><span v-else>{{ scope.row.content }}</span>
+                  <el-image v-if="scope.row.type == '2' " :src="scope.row.content | getPicUrl" style="width: 100px" ></el-image>
+                  <dl v-else-if="scope.row.type == '3' " v-for="(items, index) in scope.row.items.news_item"><el-link type="primary" target="_blank" :href="items.url">{{ items.title }}</el-link></dl>
+                  <span v-else>{{ scope.row.content }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -313,11 +355,11 @@
               </el-table-column>
             </el-table>
             <el-dialog
-              width="35%"
+              :width=width
               title="添加回复"
               :visible.sync="innerVisible2"
               append-to-body>
-              <el-tabs type="border-card" v-model="form.type">
+              <el-tabs type="border-card" v-model="form.type" @tab-click="changeWidth">
                 <el-tab-pane name="1">
                   <span slot="label"><i class="el-icon-edit"></i> 文本</span>
                   <el-form>
@@ -327,7 +369,7 @@
                   </el-form>
                 </el-tab-pane>
                 <el-tab-pane name="2">
-                  <span slot="label"><i class="el-icon-picture"></i> 图片</span>
+                  <span slot="label"><i class="el-icon-camera-solid"></i> 图片</span>
                   <el-upload
                     class="upload-demo"
                     :action=uploadUrl
@@ -337,11 +379,29 @@
                     :on-exceed="handleExceed"
                     :on-success="uploadSuccess"
                     list-type="picture">
-                    <el-button size="small" type="primary">点击上传</el-button>
+                    <el-button size="small" type="primary">点击上传<i class="el-icon-upload el-icon--right"></i></el-button>
                   </el-upload>
+                </el-tab-pane>
+                <el-tab-pane name="3">
+                  <span slot="label"><i class="el-icon-picture"></i> 图文</span>
+                  <el-table
+                    :data="news"
+                    style="width:100%">
+                    <el-table-column label="ID" align="center">
+                      <template slot-scope="scope">
+                        <el-radio v-model="media_id" :label="scope.row.media_id"></el-radio>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="素材名称">
+                      <template slot-scope="scope">
+                        <dl v-for="(items, index) in scope.row.content.news_item"><el-link type="primary" target="_blank" :href="items.url">{{ items.title }}</el-link></dl>
+                      </template>
+                    </el-table-column>
+                  </el-table>
                 </el-tab-pane>
               </el-tabs>
               <div slot="footer" class="dialog-footer">
+                <el-button style="float: left;" v-if="form.type == 3 " type="success" :loading="loading" @click="sysMaterial()">同步微信公众号素材</el-button>
                 <el-button @click="innerVisible2 = false">取 消</el-button>
                 <el-button type="primary" :disabled="disable1" @click="saveReply(2)">确 定</el-button>
               </div>
@@ -360,10 +420,12 @@
 
 <script>
   import {getReply,getReplyDetail,handleReply,deleteReply,handleRule,deleteRule,getRules} from '@/api/reply'
+  import {fetchList,setMenus,getmaterial,sysmaterial,selectmaterial } from '@/api/wechat';
   import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
   const textMap = {
     1: '文本',
-    2: '图片'
+    2: '图片',
+    3: '图文'
   };
   const matchMap = {
     1:'全匹配',
@@ -384,17 +446,23 @@
     },
     data() {
       return {
+        news:[],
+        width:"35%",
+        media_id:'',
         disable1:false,
         disable2:false,
         listLoading:true,
         ruleLoading:false,
+        loading:false,
         total:0,
         uploadUrl: process.env.VUE_APP_UPLOAD_URL,
         fileList: [],
         form:{
+          id:'',
           rule_id:'',
           type:'1',
           content:'',
+          items:undefined
         },
         statusMap :{
           'create': '添加回复',
@@ -469,6 +537,7 @@
         })
       },
       createReply(rule_id,type=1){
+        this.selectMaterialId();
         this.resetForm();
         if(rule_id === 0){
           this.dialogVisible = true;
@@ -478,20 +547,24 @@
           }else{
             this.innerVisible2 = true;
           }
-
         }
         this.form.rule_id = rule_id;
       },
       resetForm(){
+        this.media_id = '';
+        this.disable1 = false;
         this.fileList = [];
+        this.width = "35%";
         this.form = {
           id:'',
           rule_id:'',
           type:'1',
-          content:''
+          content:'',
+          items:undefined
         };
       },
       resetForm2(){
+        this.disable2 = false;
         this.formLabelAlign ={
           id:'',
           type:'',
@@ -513,15 +586,22 @@
         };
       },
       saveReply(type){
+        this.disable1 = true;
         if(this.form.type === '2'){
           if(this.fileList.length > 0){
             this.form.content = this.fileList[0].path;
           }else{
             this.form.content = '';
           }
+        }else if(this.form.type === '3'){
+          this.form.content = this.media_id;
+          getmaterial({media_id:this.media_id}).then(response=>{
+            this.form.items = response.data.content;
+          })
         }
         if(this.form.content === ''){
           this.$message.error('回复内容不能为空');
+          this.disable1 = false;
           return
         }
         if(type === 2){
@@ -539,7 +619,6 @@
           this.innerVisible1 = false;
           this.innerVisible2 = false;
         }else{
-          this.disable1 = true;
           handleReply(this.form).then(response => {
             this.$message.success('操作成功');
             if(this.form.id > 0){
@@ -562,6 +641,7 @@
         }
       },
       updateReply(row,type){
+        this.selectMaterialId();
         this.resetForm();
         if(type === 1){
           this.dialogVisible = true;
@@ -574,6 +654,9 @@
         this.form.type = row.type.toString();
         if(row.type == '1'){
           this.form.content = row.content;
+        }else if(row.type == '3'){
+          this.width = "60%";
+          this.media_id = row.content;
         }else{
           this.fileList.push({url:process.env.VUE_APP_IMAGE_DIR + row.content ,path:row.content})
         }
@@ -675,6 +758,30 @@
       },
       handleRemove(){
           this.fileList = [];
+      },
+      //选择公众号素材库素材
+      selectMaterialId:function(){
+        selectmaterial({reply:1}).then(response => {
+          this.news = response.data;
+        })
+      },
+      sysMaterial:function(){
+        this.loading = true;
+        sysmaterial().then(response=>{
+          if(response.code === 1000){
+            selectmaterial().then(response => {
+              this.news = response.data;
+              this.loading = false;
+            })
+          }
+        });
+      },
+      changeWidth(){
+        if(this.form.type == 3){
+          this.width = "60%";
+        }else{
+          this.width = "35%";
+        }
       }
     }
   };
